@@ -36,10 +36,13 @@ To run streamlit app
 ```
 streamlit run app.py
 ```
-##References
+## References
+The dataset is great. The original paper about dataset was written by Mughees Ahmad PhD Researcher and University of Windsor. You can [find more informatinon here](https://github.com/ahmadmughees/SH17dataset) and cite it using the following :
+```
 @article{ahmad_2024_sh17,
   title={SH17: A Dataset for Human Safety and Personal Protective Equipment Detection in Manufacturing Industry},
   author={Ahmad, Hafiz Mughees and Rahimi, Afshin},
   journal={Arxiv},
   year={2024}
 }
+```
