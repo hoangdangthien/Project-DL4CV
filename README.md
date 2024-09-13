@@ -36,7 +36,7 @@ To run streamlit app
 ```
 streamlit run app.py
 ```
-Fine-tuned model's weights restore in folder ___models/YOLO/__,  demo video is in folder ___Video___
+Fine-tuned model's weights restore in folder ___models/YOLO/___ ,  demo video is in folder ___Video___
 ## Acknowledment
 - The dataset is great. The original paper about dataset was written by Mughees Ahmad PhD Researcher and University of Windsor. You can [find more informatinon here](https://github.com/ahmadmughees/SH17dataset) and cite it using the following :
 ```
