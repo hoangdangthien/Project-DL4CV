@@ -6,7 +6,8 @@ from ultralytics import YOLO
 from boxmot import DeepOCSORT
 import tempfile
 from pathlib import Path
-
+#get device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #load model
 @st.cache_resource
 def load_model():
@@ -17,7 +18,7 @@ def load_model():
 def load_tracker():
     return DeepOCSORT(
         model_weights=Path('osnet_x0_25_msmt17.pt'),
-        device="cuda:0",
+        device=device,
         fp16=True,
     )
 #read video in frame, detect object in each frame, tracking only person, find which person the ppe belong to
