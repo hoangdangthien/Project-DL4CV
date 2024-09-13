@@ -36,3 +36,10 @@ To run streamlit app
 ```
 streamlit run app.py
 ```
+##References
+@article{ahmad_2024_sh17,
+  title={SH17: A Dataset for Human Safety and Personal Protective Equipment Detection in Manufacturing Industry},
+  author={Ahmad, Hafiz Mughees and Rahimi, Afshin},
+  journal={Arxiv},
+  year={2024}
+}
