@@ -1,67 +1,44 @@
-import cv2
-import torch
+import streamlit as st 
+import cv2 
 import numpy as np
-from ultralytics import RTDETR, YOLO
+import torch
+from ultralytics import YOLO
 from boxmot import DeepOCSORT
+import tempfile
 from pathlib import Path
-import os
 
-#get path
-abs_path = os.path.dirname(__file__)
+#load model
+@st.cache_resource
+def load_model():
+    return YOLO('./models/YOLO/best.pt')
 
-# Initialize YOLO model
-#model = RTDETR('./models/RTDETR/best.pt')
-model = YOLO(abs_path+'/models/YOLO/best.pt')
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-# Define class names (adjust these according to your model's classes)
-CLASS_NAMES = ["person","ear","ear-mufs","face","face-guard",'face-mask-medical',
-                            "foot","tools","glasses","gloves","helmet","hands","head",
-                            "medical-suit","shoes","safety-suit","safety-vest"]
-
-# Define the specific PPE items we want to detect
-REQUIRED_PPE = {"helmet", "safety-vest","shoes"}
-
-# Initialize DeepOCSORT tracker
-tracker = DeepOCSORT(
-    model_weights=Path('osnet_x0_25_msmt17.pt'),  # path to DeepOCSORT weights if you have them
-    device=device,  # use "cuda" if you have a GPU
-    fp16=False
-)
-
-# Open video capture
-cap = cv2.VideoCapture(0)  # Use 0 for webcam or provide video file path
-
-# Initialize color map for classes
-color_map = np.random.randint(0, 255, size=(len(CLASS_NAMES), 3), dtype=np.uint8)
-
-cap = cv2.VideoCapture(abs_path+"/Video/Take Time to Take Care (Working at Heights) Video.mp4")  # Use 0 for webcam or provide video file path
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fps = int(cap.get(cv2.CAP_PROP_FPS))
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-out = cv2.VideoWriter(abs_path+'/Video/output_video.mp4', fourcc, fps, (width, height))
-def associate_ppe_with_workers(workers, ppe_items):
-    worker_ppe = {worker[4]: set() for worker in workers}
+#load tracker 
+@st.cache_resource
+def load_tracker():
+    return DeepOCSORT(
+        model_weights=Path('osnet_x0_25_msmt17.pt'),
+        device="cuda:0",
+        fp16=True,
+    )
+#read video in frame, detect object in each frame, tracking only person, find which person the ppe belong to
+def associate_ppe_with_persons(persons, ppe_items,CLASS_NAMES):
+    person_ppe = {person[4]: set() for person in persons}
     
-    if  len(workers)==0:
-        return worker_ppe
+    if  len(persons)==0:
+        return person_ppe
 
-    worker_centers = [[(w[0] + w[2]) / 2, (w[1] + w[3]) / 2] for w in workers]
+    person_centers = [[(p[0] + p[2]) / 2, (p[1] + p[3]) / 2] for p in persons]
     
     for ppe in ppe_items:
         distances=[]
         ppe_center = np.array([(ppe[0] + ppe[2]) / 2, (ppe[1] + ppe[3]) / 2])
-        distances = np.linalg.norm(worker_centers - ppe_center, axis=1)
-        nearest_worker_idx = np.argmin(distances)
-        worker_ppe[workers[nearest_worker_idx][4]].add(CLASS_NAMES[int(ppe[4])])
+        distances = np.linalg.norm(person_centers - ppe_center, axis=1)
+        nearest_person_idx = np.argmin(distances)
+        person_ppe[persons[nearest_person_idx][4]].add(CLASS_NAMES[int(ppe[4])])
     
-    return worker_ppe
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+    return person_ppe
 
+def process_frame(frame,model,tracker,CLASS_NAMES,REQUIRED_PPE):
     # Perform RTDETR detection
     results = model.predict(frame,conf=0.3)
 
@@ -87,7 +64,7 @@ while True:
         person_detections=np.empty((0,6))
         tracks = tracker.update(np.array(person_detections), frame)
     
-    person_ppe = associate_ppe_with_workers(tracks, ppe_detections)
+    person_ppe = associate_ppe_with_persons(tracks, ppe_detections,CLASS_NAMES)
 
     # Process and visualize results
     for track in tracks:
@@ -114,15 +91,104 @@ while True:
             color_ppe = (0,255,0) if status=="yes" else (0,0,255)
             cv2.putText(frame, f"{ppe_item}: {status}", (x1, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color_ppe, 2)
             y_offset += 20
+    return frame
+def reset_app_state():
+    # Clear all st.session_state variables
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    
+    # Clear cache
+    st.cache_resource.clear()
+def main():
+    st.title("PPE Tracking App")
+    #init everything 
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # Define class names (adjust these according to your model's classes)
+    CLASS_NAMES = ["person","ear","ear-mufs","face","face-guard",'face-mask-medical',
+                                "foot","tools","glasses","gloves","helmet","hands","head",
+                                "medical-suit","shoes","safety-suit","safety-vest"]
 
-    # Display the frame
-    cv2.imshow('Worker Tracking with PPE Detection', frame)
-    #write frame to output video
-    out.write(frame)
+    # Define the specific PPE items we want to detect
+    REQUIRED_PPE = {"helmet", "safety-vest","shoes"}
+    start = st.button("Start")
+    if st.button('Stop'):
+        reset_app_state()
+        st.rerun()
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    model = load_model()
+    tracker = load_tracker()
 
-cap.release()
-out.release()
-cv2.destroyAllWindows()
+    option = st.selectbox("Choose input source", ["Upload Video", "Use Webcam"])
+    save_video = st.checkbox("Save processed video")
+
+    if save_video:
+        save_path = st.text_input("Enter the path to save the video", "./output1.mp4")
+
+    if option == "Upload Video":
+    
+        uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "mov"])
+        if uploaded_file is not None and start:
+            tfile = tempfile.NamedTemporaryFile(delete=False) 
+            tfile.write(uploaded_file.read())
+            vf = cv2.VideoCapture(tfile.name)
+            
+            width = int(vf.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(vf.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = int(vf.get(cv2.CAP_PROP_FPS))
+            
+            if save_video:
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                out = cv2.VideoWriter(save_path, fourcc, fps, (width, height))
+            
+            stframe = st.empty()
+            
+            while vf.isOpened():
+                ret, frame = vf.read()
+                if not ret:
+                    break
+                
+                frame = process_frame(frame, model, tracker, CLASS_NAMES,REQUIRED_PPE)
+                stframe.image(frame, channels="BGR")
+                
+                if save_video:
+                    out.write(frame)
+            
+            vf.release()
+            if save_video:
+                out.release()
+                st.success(f"Video saved to {save_path}")
+
+    elif option == "Use Webcam":
+        cap = cv2.VideoCapture(-1,cv2.CAP_V4L)
+        stframe = st.empty()
+
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = 30  # Assuming 30 fps for webcam
+
+        if save_video:
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(save_path, fourcc, fps, (width, height))
+
+        stop_button = st.button('Stop')
+
+        while not stop_button:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            
+            frame = process_frame(frame, model, tracker, CLASS_NAMES,REQUIRED_PPE)
+            stframe.image(frame, channels="BGR")
+            
+            if save_video:
+                out.write(frame)
+
+            stop_button = st.button('Stop')
+
+        cap.release()
+        if save_video:
+            out.release()
+            st.success(f"Video saved to {save_path}")
+
+if __name__ == "__main__":
+    main()
