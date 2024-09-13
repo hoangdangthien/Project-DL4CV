@@ -1,4 +1,6 @@
 # Project-DL4CV
+Mentor : Lê Nguyễn Thanh Huy ([CoTAI - Center of Talent in AI](https://gem.cot.ai/))\
+Special thanks to  my mentor Lê Nguyễn Thanh Huy for your awesome lectures, sharing usefull information and experience with me.
 ## How to run the code
 First you need to clone this repository to your local machine. Then open terminal and paste this command line
 ```
