@@ -10,7 +10,7 @@ Then move into the clone directory
 ```
 cd Project-DL4CV
 ```
-Next download data from the following link:  [SH17dataset](https://www.kaggle.com/datasets/mugheesahmad/sh17-dataset-for-ppe-detection)\
+Next download data from the following link:  [kaggle](https://www.kaggle.com/datasets/mugheesahmad/sh17-dataset-for-ppe-detection)\
 Create folder ___datasets___ , then extract data and copy ___images___, ___labels___ and ___voc_labels___ folders to ___datasets___ folder\
 Create a virtual environment with venv
 ```
@@ -36,8 +36,8 @@ To run streamlit app
 ```
 streamlit run app.py
 ```
-## References
-The dataset is great. The original paper about dataset was written by Mughees Ahmad PhD Researcher and University of Windsor. You can [find more informatinon here](https://github.com/ahmadmughees/SH17dataset) and cite it using the following :
+## Acknowledment
+- The dataset is great. The original paper about dataset was written by Mughees Ahmad PhD Researcher and University of Windsor. You can [find more informatinon here](https://github.com/ahmadmughees/SH17dataset) and cite it using the following :
 ```
 @article{ahmad_2024_sh17,
   title={SH17: A Dataset for Human Safety and Personal Protective Equipment Detection in Manufacturing Industry},
@@ -46,3 +46,4 @@ The dataset is great. The original paper about dataset was written by Mughees Ah
   year={2024}
 }
 ```
+-  Training of the models is done using [ultralytics](https://github.com/ultralytics/ultralytics) repository. Thanks for the greate implementations.
