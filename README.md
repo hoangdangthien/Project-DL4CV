@@ -30,7 +30,7 @@ python train.py
 ```
 To run error analysis
 ```
-python Error analysis.py
+python 'Error analysis.py'
 ```
 To run streamlit app
 ```
