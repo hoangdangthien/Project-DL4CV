@@ -9,5 +9,4 @@ Then move into the clone directory
 cd Project-DL4CV
 ```
 Then download data from the following link:
-```
-https://www.kaggle.com/datasets/mugheesahmad/sh17-dataset-for-ppe-detection
+- https://www.kaggle.com/datasets/mugheesahmad/sh17-dataset-for-ppe-detection
