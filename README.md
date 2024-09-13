@@ -28,6 +28,10 @@ To fine-tune model from ultralytics
 ```
 python train.py
 ```
+To run error analysis
+```
+python Error analysis.py
+```
 To run streamlit app
 ```
 streamlit run app.py
