@@ -9,8 +9,7 @@ Then move into the clone directory
 cd Project-DL4CV
 ```
 Next download data from the following link:  [SH17dataset](https://www.kaggle.com/datasets/mugheesahmad/sh17-dataset-for-ppe-detection)\
-Create folder ___datasets___\
-Next extract data and copy ___images___, ___labels___ and ___voc_labels___ folders to ___datasets___ folder\
+Create folder ___datasets___ , then extract data and copy ___images___, ___labels___ and ___voc_labels___ folders to ___datasets___ folder\
 Create a virtual environment with venv
 ```
 python -m venv .venv
