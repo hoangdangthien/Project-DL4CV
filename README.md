@@ -10,7 +10,7 @@ cd Project-DL4CV
 ```
 Next download data from the following link:  [SH17dataset](https://www.kaggle.com/datasets/mugheesahmad/sh17-dataset-for-ppe-detection)\
 \
-Next extract data and copy **images**, **labels** and **voc_labels** folder to **datasets** folder\
+Next extract data and copy ___images___, ___labels___ and ___voc_labels___ folder to ___datasets___ folder\
 Create a virtual environment with venv
 ```
 python -m venv .venv
