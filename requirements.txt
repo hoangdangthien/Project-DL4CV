@@ -2,3 +2,7 @@ boxmot==10.0.82
 ultralytics==8.2.77
 opencv-python==4.10.0.84
 setuptools
+scikit-learn
+streamlit
+fiftyone
+https://download.pytorch.org/whl/cu124
