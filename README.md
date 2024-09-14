@@ -14,11 +14,11 @@ Next download data from the following link:  [kaggle](https://www.kaggle.com/dat
 Create folder ___datasets___ , then extract data and copy ___images___, ___labels___ and ___voc_labels___ folders to ___datasets___ folder\
 Create a virtual environment with venv
 ```
-python -m venv .venv
+python -m venv venv
 ```
 Activate the enviroment
 ```
-.\.venv\Scripts\activate
+.\venv\Scripts\activate
 ```
 Install all neccessary libraries with a specific version
 ```
